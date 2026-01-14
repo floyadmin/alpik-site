@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
+const enDir = path.join(root, 'en');
 
 function run(cmd, args, options = {}) {
   const res = spawnSync(cmd, args, {
@@ -51,6 +52,24 @@ function listRootHtmlFiles() {
     .map((d) => d.name);
 }
 
+function listEnHtmlFiles() {
+  if (!fs.existsSync(enDir)) return [];
+  return fs
+    .readdirSync(enDir, { withFileTypes: true })
+    .filter((d) => d.isFile() && d.name.toLowerCase().endsWith('.html'))
+    .map((d) => d.name);
+}
+
+function toSlug(htmlFileName) {
+  return htmlFileName.replace(/\.html$/i, '');
+}
+
+function writePrettyUrlCopy(htmlFileName, srcFilePath, destBaseDir) {
+  const slug = toSlug(htmlFileName);
+  if (!slug || slug.toLowerCase() === 'index') return;
+  copyFile(srcFilePath, path.join(destBaseDir, slug, 'index.html'));
+}
+
 // 1) Rebuild /en from UA sources (and inject SEO/switcher)
 run('node', [path.join(root, 'scripts', 'rebuild-en.mjs')]);
 
@@ -59,7 +78,14 @@ ensureEmptyDir(dist);
 
 // 3) Copy site files
 for (const html of listRootHtmlFiles()) {
-  copyFile(path.join(root, html), path.join(dist, html));
+  const srcPath = path.join(root, html);
+  copyFile(srcPath, path.join(dist, html));
+  writePrettyUrlCopy(html, srcPath, dist);
+}
+
+for (const html of listEnHtmlFiles()) {
+  const srcPath = path.join(enDir, html);
+  writePrettyUrlCopy(html, srcPath, path.join(dist, 'en'));
 }
 
 for (const file of ['style.css', 'sitemap.xml', 'robots.txt', 'lang-switcher.js', 'tracking.js', '_redirects', '_headers']) {
