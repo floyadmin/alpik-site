@@ -1,4 +1,6 @@
 (function () {
+    const MOBILE_MQ = '(max-width: 900px)';
+
     function isEnPath(pathname) {
         return (pathname || '').split('/').includes('en');
     }
@@ -28,15 +30,13 @@
         return { onEn, uaHref, enHref };
     }
 
-    function ensureLangSwitch() {
-        const headerInner = document.querySelector('.header-main-inner');
-        if (!headerInner) return;
-
-        if (headerInner.querySelector('.lang-switch')) return;
+    function ensureLangSwitchEl() {
+        let wrap = document.querySelector('.lang-switch');
+        if (wrap) return wrap;
 
         const { onEn, uaHref, enHref } = buildLinks();
 
-        const wrap = document.createElement('div');
+        wrap = document.createElement('div');
         wrap.className = 'lang-switch';
         wrap.setAttribute('aria-label', 'Language switch');
 
@@ -58,7 +58,117 @@
         wrap.appendChild(sep);
         wrap.appendChild(en);
 
-        headerInner.appendChild(wrap);
+        return wrap;
+    }
+
+    function updateLangSwitch(el) {
+        if (!el) return;
+        const { onEn, uaHref, enHref } = buildLinks();
+        const links = el.querySelectorAll('a.lang-link');
+        const ua = links[0];
+        const en = links[1];
+        if (ua) {
+            ua.href = uaHref;
+            ua.classList.toggle('active', !onEn);
+        }
+        if (en) {
+            en.href = enHref;
+            en.classList.toggle('active', !!onEn);
+        }
+    }
+
+    function mountLangSwitch() {
+        const mq = window.matchMedia ? window.matchMedia(MOBILE_MQ) : null;
+        const isMobile = mq ? mq.matches : (window.innerWidth || 0) <= 900;
+
+        const el = ensureLangSwitchEl();
+        updateLangSwitch(el);
+
+        if (isMobile) {
+            const mobileNav = document.getElementById('mobileNav');
+            const ul = mobileNav ? mobileNav.querySelector('ul') : null;
+            if (!ul) return;
+
+            let li = ul.querySelector('li.mobile-lang-switch-item');
+            if (!li) {
+                li = document.createElement('li');
+                li.className = 'mobile-lang-switch-item';
+                ul.insertBefore(li, ul.firstChild);
+            }
+            if (el.parentElement !== li) {
+                li.appendChild(el);
+            }
+        } else {
+            const headerInner = document.querySelector('.header-main-inner');
+            if (!headerInner) return;
+            if (el.parentElement !== headerInner) {
+                headerInner.appendChild(el);
+            }
+        }
+    }
+
+    function setupHeaderScrollBehavior() {
+        const header = document.querySelector('.main-header');
+        if (!header) return;
+
+        const mobileNav = document.getElementById('mobileNav');
+        const threshold = 120;
+        const delta = 10;
+        let lastY = window.scrollY || 0;
+        let ticking = false;
+
+        function apply() {
+            ticking = false;
+            const y = window.scrollY || 0;
+            const menuOpen = !!(mobileNav && mobileNav.classList.contains('open'));
+
+            if (menuOpen) {
+                header.classList.remove('header-hidden');
+                header.classList.toggle('header-compact', y > threshold);
+                lastY = y;
+                return;
+            }
+
+            if (y <= 10) {
+                header.classList.remove('header-hidden');
+                header.classList.remove('header-compact');
+                lastY = y;
+                return;
+            }
+
+            if (y > lastY + delta && y > threshold) {
+                header.classList.add('header-hidden');
+                header.classList.add('header-compact');
+            } else if (y < lastY - delta) {
+                header.classList.remove('header-hidden');
+                header.classList.toggle('header-compact', y > threshold);
+            }
+
+            lastY = y;
+        }
+
+        function onScroll() {
+            if (ticking) return;
+            ticking = true;
+            window.requestAnimationFrame(apply);
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        apply();
+    }
+
+    function ensureLangSwitch() {
+        mountLangSwitch();
+        setupHeaderScrollBehavior();
+
+        const mq = window.matchMedia ? window.matchMedia(MOBILE_MQ) : null;
+        if (mq) {
+            const handler = () => mountLangSwitch();
+            if (mq.addEventListener) mq.addEventListener('change', handler);
+            else if (mq.addListener) mq.addListener(handler);
+        } else {
+            window.addEventListener('resize', () => mountLangSwitch());
+        }
     }
 
     if (document.readyState === 'loading') {

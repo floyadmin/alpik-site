@@ -57,9 +57,26 @@ header .header-main-inner > .main-nav > ul {
     z-index: 100;
     background: #1a1a1a;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.25s ease;
     display: flex;
     align-items: center;
+}
+
+.main-header.header-hidden {
+    transform: translateY(-110%);
+}
+
+.main-header.header-compact {
+    background: rgba(26, 26, 26, 0.95);
+    box-shadow: 0 2px 18px rgba(0,0,0,0.18);
+}
+
+.main-header.header-compact .header-main-inner {
+    height: 92px;
+}
+
+.main-header.header-compact .logo-img {
+    height: 88px;
 }
 
 .header-main-inner {
@@ -715,6 +732,19 @@ footer {
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+.mobile-lang-switch-item {
+    list-style: none;
+    margin-bottom: 10px;
+}
+
+.mobile-nav .lang-switch {
+    position: static;
+    transform: none;
+    display: inline-flex;
+    justify-content: center;
+    gap: 10px;
 }
 .mobile-nav a {
     color: #fff;
@@ -1860,6 +1890,10 @@ section.testimonials-section {
         display: none;
     }
     .main-nav {
+        display: none;
+    }
+
+    .header-main-inner > .lang-switch {
         display: none;
     }
 
