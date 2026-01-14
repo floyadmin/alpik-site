@@ -10,6 +10,30 @@ const dist = path.join(root, 'dist');
 const enDir = path.join(root, 'en');
 
 const GTM_ID = (process.env.SITE_GTM_ID || '').trim();
+const GADS_ID = (process.env.SITE_GADS_ID || '').trim();
+
+function injectGoogleAdsTag(html) {
+  if (!GADS_ID || !/^AW-\d+$/i.test(GADS_ID)) return html;
+
+  const headBlock = [
+    '<!-- gads:start -->',
+    '<!-- Google tag (gtag.js) -->',
+    `<script async src="https://www.googletagmanager.com/gtag/js?id=${GADS_ID}"></script>`,
+    '<script>',
+    '  window.dataLayer = window.dataLayer || [];',
+    '  function gtag(){dataLayer.push(arguments);} ',
+    '  gtag(\'js\', new Date());',
+    '',
+    `  gtag(\'config\', '${GADS_ID}');`,
+    '</script>',
+    '<!-- gads:end -->'
+  ].join('\r\n');
+
+  let out = html;
+  out = out.replace(/\s*<!-- gads:start -->[\s\S]*?<!-- gads:end -->\s*/g, '\r\n');
+  out = out.replace(/<\/head>/i, `${headBlock}\r\n</head>`);
+  return out;
+}
 
 function injectGtm(html) {
   if (!GTM_ID || !/^GTM-[A-Z0-9]+$/i.test(GTM_ID)) return html;
@@ -59,7 +83,10 @@ function copyFile(srcPath, destPath) {
 function copyHtml(srcPath, destPath) {
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
   const html = fs.readFileSync(srcPath, 'utf8');
-  fs.writeFileSync(destPath, injectGtm(html), 'utf8');
+  let out = html;
+  out = injectGtm(out);
+  out = injectGoogleAdsTag(out);
+  fs.writeFileSync(destPath, out, 'utf8');
 }
 
 function copyDir(srcDir, destDir) {
