@@ -1859,8 +1859,39 @@ section.testimonials-section {
     .main-nav ul {
         display: none;
     }
+    .main-nav {
+        display: none;
+    }
+
+    .header-main-inner {
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .logo-block {
+        order: 1;
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+
+    .lang-switch {
+        position: static;
+        right: auto;
+        top: auto;
+        transform: none;
+        margin-left: auto;
+        z-index: 0;
+        order: 2;
+    }
+
     .mobile-menu-btn {
         display: block;
+        position: static;
+        right: auto;
+        top: auto;
+        transform: none;
+        margin-left: 12px;
+        order: 3;
     }
     .hero-inner {
         padding: 40px 0;
@@ -1877,6 +1908,18 @@ section.testimonials-section {
     }
     .contacts-block {
         text-align: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .logo-img {
+        height: 72px;
+    }
+    .lang-link {
+        min-width: 32px;
+        height: 26px;
+        padding: 0 8px;
+        font-size: 0.82rem;
     }
 }
 @media (max-width: 600px) {

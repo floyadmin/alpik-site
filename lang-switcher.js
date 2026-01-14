@@ -22,8 +22,8 @@
         const onEn = isEnPath(pathname);
 
         const slug = getSlug(pathname);
-        const uaHref = slug ? `/${slug}/` : '/';
-        const enHref = slug ? `/en/${slug}/` : '/en/';
+        const uaHref = slug ? `/${slug}.html` : '/';
+        const enHref = slug ? `/en/${slug}.html` : '/en/';
 
         return { onEn, uaHref, enHref };
     }
