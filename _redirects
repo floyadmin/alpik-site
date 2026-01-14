@@ -4,10 +4,14 @@
 /en  /en/  301
 
 # Removed services
+/service-01/  /our-services/  301
+/service-01.html  /our-services/  301
 /service-12/  /our-services/  301
 /service-12.html  /our-services/  301
 /service-11/  /our-services/  301
 /service-11.html  /our-services/  301
+/en/service-01/  /en/our-services/  301
+/en/service-01.html  /en/our-services/  301
 /en/service-12/  /en/our-services/  301
 /en/service-12.html  /en/our-services/  301
 /en/service-11/  /en/our-services/  301
