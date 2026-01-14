@@ -12,12 +12,6 @@ const enDir = path.join(root, 'en');
 const GTM_ID = (process.env.SITE_GTM_ID || '').trim();
 const GADS_ID = (process.env.SITE_GADS_ID || '').trim();
 
-function ensureMediaProtection(html) {
-  if (html.includes('protect-media.js')) return html;
-  const insert = '    <script src="/protect-media.js" defer></script>\r\n</body>';
-  return html.replace(/<\/body>/i, insert);
-}
-
 function injectGoogleAdsTag(html) {
   if (!GADS_ID || !/^AW-\d+$/i.test(GADS_ID)) return html;
 
@@ -92,7 +86,6 @@ function copyHtml(srcPath, destPath) {
   let out = html;
   out = injectGtm(out);
   out = injectGoogleAdsTag(out);
-  out = ensureMediaProtection(out);
   fs.writeFileSync(destPath, out, 'utf8');
 }
 
@@ -157,7 +150,7 @@ for (const html of listEnHtmlFiles()) {
   writePrettyUrlCopy(html, srcPath, path.join(dist, 'en'));
 }
 
-for (const file of ['style.css', 'sitemap.xml', 'robots.txt', 'lang-switcher.js', 'tracking.js', 'protect-media.js', '_redirects', '_headers']) {
+for (const file of ['style.css', 'sitemap.xml', 'robots.txt', 'lang-switcher.js', 'tracking.js', '_redirects', '_headers']) {
   const src = path.join(root, file);
   if (fs.existsSync(src)) {
     copyFile(src, path.join(dist, file));
