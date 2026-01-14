@@ -1998,3 +1998,92 @@ section.testimonials-section {
         grid-template-columns: 1fr;
     }
 }
+
+/* --- Header polish (desktop + mobile) --- */
+.main-header {
+    background: rgba(26, 26, 26, 0.92);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.header-main-inner {
+    height: 120px;
+    gap: 22px;
+}
+
+.logo-img {
+    height: 96px;
+}
+
+.main-header-spacer {
+    height: 120px;
+}
+
+/* Desktop layout: logo left, nav centered, actions right */
+@media (min-width: 901px) {
+    .main-header .header-main-inner {
+        justify-content: flex-start;
+    }
+
+    .main-header .header-main-inner .main-nav {
+        position: static;
+        left: auto;
+        transform: none;
+        flex: 1 1 auto;
+        display: flex;
+        justify-content: center;
+        margin: 0;
+    }
+
+    .main-header .header-main-inner .main-nav > ul {
+        justify-content: center;
+        gap: clamp(14px, 2.4vw, 32px);
+        font-size: 1.1rem;
+    }
+
+    .lang-switch {
+        position: static;
+        transform: none;
+        right: auto;
+        top: auto;
+        margin-left: 0;
+    }
+}
+
+/* Mobile layout: smaller header, only logo + burger (lang lives in burger menu) */
+@media (max-width: 900px) {
+    .header-main-inner {
+        height: 84px;
+        padding: 0 18px;
+    }
+    .main-header-spacer {
+        height: 84px;
+    }
+    .logo-img {
+        height: 64px;
+    }
+    .mobile-menu-btn {
+        font-size: 2rem;
+        color: #ffe600;
+        padding: 10px 12px;
+        border-radius: 10px;
+        line-height: 1;
+    }
+    .mobile-menu-btn:active {
+        background: rgba(255, 230, 0, 0.10);
+    }
+}
+
+/* Compact state on scroll */
+.main-header.header-compact .header-main-inner {
+    height: 86px;
+}
+
+.main-header.header-compact .logo-img {
+    height: 68px;
+}
+
+.main-header.header-compact + .main-header-spacer {
+    height: 120px;
+}
