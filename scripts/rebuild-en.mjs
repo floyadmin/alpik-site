@@ -56,11 +56,11 @@ const serviceTranslations = {
     ]
   },
   '06': {
-    title: 'Roof installation & repair',
-    subtitle: 'We repair roofs, eliminate leaks and restore junction nodes with the right technology.',
+    title: 'Roof repair & painting',
+    subtitle: 'We repair roofs, eliminate leaks and paint roof elements to protect and refresh the appearance.',
     paragraphs: [
-      'Roofing works are performed with the architectural and technical specifics of the object in mind. We install new roofs and perform major or routine repairs of existing ones.',
-      'The scope includes dismantling damaged areas, restoring supporting structures, installing waterproofing and thermal insulation, and rebuilding junction nodes. We work with PVC/TPO membranes, bituminous materials, metal tiles and corrugated/profled sheet to ensure long‑term tightness and durability.'
+      'Roof works are performed with the architectural and technical specifics of the facility in mind. We provide routine and major repairs for existing roofs, eliminate leaks and restore critical junctions.',
+      'The scope may include dismantling damaged areas, restoring supporting structures, installing waterproofing and thermal insulation, and rebuilding junction nodes. To protect and renew the exterior, we also paint roof coatings and metal elements using durable systems suitable for outdoor exposure.'
     ]
   },
   '07': {
@@ -339,7 +339,40 @@ const pageTranslations = {
     ['aria-label="Категорії"', 'aria-label="Pages"'],
     ['aria-label="Логотип"', 'aria-label="Logo"'],
     ['Всі права захищені.', 'All rights reserved.']
-  ]
+  ],
+  'montage.html': [
+    ['<title>Монтажні роботи — alpiK</title>', '<title>Installation works — alpiK</title>'],
+    ['Монтажні роботи', 'Installation works'],
+    ['Виконуємо монтажні роботи на висоті та промислових об’єктах: від водостоків і фасадних систем до світлопрозорих конструкцій.',
+      'We deliver installation works at height and on industrial sites: from gutters and facade systems to translucent structures.'],
+    ['Перелік монтажних робіт', 'Installation services'],
+    ['Оберіть напрямок монтажу — підкажемо оптимальне рішення і прорахуємо вартість.',
+      'Choose the type of installation — we’ll recommend the best approach and provide an estimate.'],
+    ['ДО ВСІХ ПОСЛУГ', 'ALL SERVICES'],
+  ],
+
+  'repair.html': [
+    ['<title>Ремонтні роботи — alpiK</title>', '<title>Repair works — alpiK</title>'],
+    ['Ремонтні роботи', 'Repair works'],
+    ['Виконуємо ремонт і відновлення конструкцій на висоті: фасади, димові труби, силоси, дахи та інші елементи.',
+      'We perform repair and restoration works at height: facades, chimney stacks, silos, roofs and other elements.'],
+    ['Перелік ремонтних робіт', 'Repair services'],
+    ['Оберіть напрямок ремонту — підкажемо оптимальне рішення і прорахуємо вартість.',
+      'Choose the type of repair — we’ll recommend the best approach and provide an estimate.'],
+    ['ДО ВСІХ ПОСЛУГ', 'ALL SERVICES'],
+  ],
+
+  'solar-panels.html': [
+    ['<title>Встановлення сонячних панелей — alpiK</title>', '<title>Solar panel installation — alpiK</title>'],
+    ['Встановлення сонячних панелей', 'Solar panel installation'],
+    ['Підбираємо рішення під ваш об’єкт та монтуємо сонячні панелі на дахах і конструкціях: кріплення, розміщення, акуратне підключення.',
+      'We select the right solution for your site and install solar panels on roofs and structures: mounting, layout and neat wiring.'],
+    ['Що входить у роботу', 'What’s included'],
+    ['Оцінка об’єкта та підбір рішення', 'Site review and solution selection'],
+    ['Монтаж кріплень та панелей', 'Mounting rails and panels'],
+    ['Акуратне прокладання кабелів', 'Neat cable routing'],
+    ['Консультація та прорахунок', 'Consultation and estimate'],
+  ],
 };
 
 function applyPageTranslations(html, fileName) {
@@ -444,11 +477,11 @@ function normalizeForPrettyUrls(html, { isEn }) {
     out = out.replace(/href='\/'/g, "href='/en/'");
 
     out = out.replace(
-      /href="\/(about|contacts|our-services|our-projects|service-\d{2})\/?"/g,
+      /href="\/(about|contacts|our-services|our-projects|service-\d{2}|montage|repair|solar-panels)\/?"/g,
       (_m, slug) => `href="/en/${slug}/"`
     );
     out = out.replace(
-      /href='\/(about|contacts|our-services|our-projects|service-\d{2})\/?'/g,
+      /href='\/(about|contacts|our-services|our-projects|service-\d{2}|montage|repair|solar-panels)\/?'/g,
       (_m, slug) => `href='/en/${slug}/'`
     );
   }
@@ -573,6 +606,31 @@ function applyServicesCatalogTranslation(html) {
   return out;
 }
 
+function applyServiceCardsTranslation(html) {
+  let out = html;
+
+  // Translate service cards (title + aria-label) based on service number
+  out = out.replace(
+    /(<a\s+class="services-catalog-card"[\s\S]*?href=")([^"]*?service-(\d{2})\/)("[\s\S]*?aria-label=")([^"]*)("[\s\S]*?>)/gi,
+    (m, p1, href, no, p4, _old, p6) => {
+      const t = serviceTranslations[no];
+      if (!t) return m;
+      return `${p1}${href}${p4}${t.title}${p6}`;
+    }
+  );
+
+  out = out.replace(
+    /(<a\s+class="services-catalog-card"[\s\S]*?href=")([^"]*?service-(\d{2})\/)("[\s\S]*?<h3\s+class="services-catalog-title">)[\s\S]*?(<\/h3>)/gi,
+    (m, p1, href, no, p4, p5) => {
+      const t = serviceTranslations[no];
+      if (!t) return m;
+      return `${p1}${href}${p4}${t.title}${p5}`;
+    }
+  );
+
+  return out;
+}
+
 function buildEnFromUa(html, fileName) {
   let out = html;
 
@@ -648,6 +706,10 @@ function buildEnFromUa(html, fileName) {
 
   if (fileName.toLowerCase() === 'our-services.html') {
     out = applyServicesCatalogTranslation(out);
+  }
+
+  if (fileName.toLowerCase() === 'montage.html' || fileName.toLowerCase() === 'repair.html') {
+    out = applyServiceCardsTranslation(out);
   }
 
   // SEO: canonical + hreflang

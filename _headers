@@ -13,7 +13,7 @@
   Cache-Control: public, max-age=300
 
 /tracking.js
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap.xml
   Cache-Control: public, max-age=3600

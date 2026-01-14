@@ -32,6 +32,25 @@
   </url>
 
   <url>
+    <loc>https://alpik.com.ua/montage/</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://alpik.com.ua/repair/</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://alpik.com.ua/solar-panels/</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
     <loc>https://alpik.com.ua/service-01/</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>monthly</changefreq>
@@ -87,18 +106,6 @@
   </url>
   <url>
     <loc>https://alpik.com.ua/service-10/</loc>
-    <lastmod>2026-01-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://alpik.com.ua/service-11/</loc>
-    <lastmod>2026-01-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://alpik.com.ua/service-12/</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -172,6 +179,25 @@
   </url>
 
   <url>
+    <loc>https://alpik.com.ua/en/montage/</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://alpik.com.ua/en/repair/</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://alpik.com.ua/en/solar-panels/</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
     <loc>https://alpik.com.ua/en/service-01/</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>monthly</changefreq>
@@ -227,18 +253,6 @@
   </url>
   <url>
     <loc>https://alpik.com.ua/en/service-10/</loc>
-    <lastmod>2026-01-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://alpik.com.ua/en/service-11/</loc>
-    <lastmod>2026-01-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://alpik.com.ua/en/service-12/</loc>
     <lastmod>2026-01-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
