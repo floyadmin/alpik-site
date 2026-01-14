@@ -984,6 +984,13 @@ section.services-catalog-section {
     background-image: linear-gradient(0deg, rgb(0, 0, 0), rgba(255, 230, 0, 0.26)), url('img/18.jpg');
 }
 
+/* Єдине прев’ю для сторінки "Наші послуги" */
+.services-catalog--uniform .services-catalog-card::before {
+    background-image:
+        linear-gradient(0deg, rgb(0, 0, 0), rgba(255, 230, 0, 0.26)),
+        url('/img/service-00.png') !important;
+}
+
 .services-catalog-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 14px 44px rgba(0, 0, 0, 0.14);
