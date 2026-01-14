@@ -93,7 +93,7 @@
             if (!li) {
                 li = document.createElement('li');
                 li.className = 'mobile-lang-switch-item';
-                ul.insertBefore(li, ul.firstChild);
+                ul.appendChild(li);
             }
             if (el.parentElement !== li) {
                 li.appendChild(el);
