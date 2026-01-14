@@ -165,6 +165,7 @@ const pageTranslations = {
     ['<!-- header-top с телефоном удалён -->', '<!-- header-top with phone removed -->'],
     ['<!-- Секция: Наші послуги (overview) -->', '<!-- Section: Our services (overview) -->'],
     ['Більше 1000 клієнтів вже довірилися нам', 'More than 1000 clients have already trusted us'],
+    ['Якісне виконання висотних робіт', 'High-quality work at height'],
     ['Клієнти оцінили професіоналізм «alpiK»,', 'Clients appreciate the professionalism of “alpiK”,'],
     ['адже наші відносини побудовані на', 'because our relationships are built on'],
     ['партнерстві та довірі', 'partnership and trust'],
