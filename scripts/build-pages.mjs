@@ -9,6 +9,31 @@ const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
 const enDir = path.join(root, 'en');
 
+const GTM_ID = (process.env.SITE_GTM_ID || '').trim();
+
+function injectGtm(html) {
+  if (!GTM_ID || !/^GTM-[A-Z0-9]+$/i.test(GTM_ID)) return html;
+
+  const headBlock = [
+    '<!-- gtm:start -->',
+    `<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');</script>`,
+    '<!-- gtm:end -->'
+  ].join('\r\n');
+
+  const bodyBlock = [
+    '<!-- gtm-noscript:start -->',
+    `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>`,
+    '<!-- gtm-noscript:end -->'
+  ].join('\r\n');
+
+  let out = html;
+  out = out.replace(/\s*<!-- gtm:start -->[\s\S]*?<!-- gtm:end -->\s*/g, '\r\n');
+  out = out.replace(/\s*<!-- gtm-noscript:start -->[\s\S]*?<!-- gtm-noscript:end -->\s*/g, '\r\n');
+  out = out.replace(/<\/head>/i, `${headBlock}\r\n</head>`);
+  out = out.replace(/<body([^>]*)>/i, `<body$1>\r\n${bodyBlock}`);
+  return out;
+}
+
 function run(cmd, args, options = {}) {
   const res = spawnSync(cmd, args, {
     cwd: root,
@@ -31,6 +56,12 @@ function copyFile(srcPath, destPath) {
   fs.copyFileSync(srcPath, destPath);
 }
 
+function copyHtml(srcPath, destPath) {
+  fs.mkdirSync(path.dirname(destPath), { recursive: true });
+  const html = fs.readFileSync(srcPath, 'utf8');
+  fs.writeFileSync(destPath, injectGtm(html), 'utf8');
+}
+
 function copyDir(srcDir, destDir) {
   fs.mkdirSync(destDir, { recursive: true });
   const entries = fs.readdirSync(srcDir, { withFileTypes: true });
@@ -40,7 +71,11 @@ function copyDir(srcDir, destDir) {
     if (e.isDirectory()) {
       copyDir(src, dst);
     } else if (e.isFile()) {
-      copyFile(src, dst);
+      if (e.name.toLowerCase().endsWith('.html')) {
+        copyHtml(src, dst);
+      } else {
+        copyFile(src, dst);
+      }
     }
   }
 }
@@ -67,7 +102,7 @@ function toSlug(htmlFileName) {
 function writePrettyUrlCopy(htmlFileName, srcFilePath, destBaseDir) {
   const slug = toSlug(htmlFileName);
   if (!slug || slug.toLowerCase() === 'index') return;
-  copyFile(srcFilePath, path.join(destBaseDir, slug, 'index.html'));
+  copyHtml(srcFilePath, path.join(destBaseDir, slug, 'index.html'));
 }
 
 // 1) Rebuild /en from UA sources (and inject SEO/switcher)
@@ -79,7 +114,7 @@ ensureEmptyDir(dist);
 // 3) Copy site files
 for (const html of listRootHtmlFiles()) {
   const srcPath = path.join(root, html);
-  copyFile(srcPath, path.join(dist, html));
+  copyHtml(srcPath, path.join(dist, html));
   writePrettyUrlCopy(html, srcPath, dist);
 }
 
