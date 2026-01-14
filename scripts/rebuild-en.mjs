@@ -136,11 +136,11 @@ const serviceTranslations = {
     ]
   },
   '16': {
-    title: 'Solar panels installation at height',
-    subtitle: 'Installation of PV systems on roofs and elevated structures with reliable fastening.',
+    title: 'Solar panels & inverter installation',
+    subtitle: 'Installation of solar panels and inverters on roofs and structures with safe mounting and neat cabling.',
     paragraphs: [
-      'We mount solar panels on roofs and elevated structures, including brackets, rails and panel installation.',
-      'We follow manufacturer requirements and site safety rules to ensure correct geometry, tightness and reliable long‑term operation.'
+      'We install solar panels and inverters for rooftop PV systems: mounting rails, panel layout, inverter placement and secure fastening.',
+      'We route and secure cables, seal roof penetrations where needed, and follow manufacturer requirements and electrical safety rules for reliable long‑term operation.'
     ]
   },
   '17': {
@@ -553,20 +553,20 @@ function applyServicesCatalogTranslation(html) {
 
   // Each card: aria-label + title based on service number
   out = out.replace(
-    /(<a\s+class="services-catalog-card"[\s\S]*?href="service-(\d{2})\.html"[\s\S]*?aria-label=")([^"]*)("[\s\S]*?>)/gi,
-    (m, p1, no, _old, p4) => {
+    /(<a\s+class="services-catalog-card"[\s\S]*?href=")([^"]*?service-(\d{2})\/)("[\s\S]*?aria-label=")([^"]*)("[\s\S]*?>)/gi,
+    (m, p1, _href, no, p4, _old, p6) => {
       const t = serviceTranslations[no];
       if (!t) return m;
-      return `${p1}${t.title}${p4}`;
+      return `${p1}${_href}${p4}${t.title}${p6}`;
     }
   );
 
   out = out.replace(
-    /(<a\s+class="services-catalog-card"[\s\S]*?href="service-(\d{2})\.html"[\s\S]*?<h3\s+class="services-catalog-title">)[\s\S]*?(<\/h3>)/gi,
-    (m, p1, no, p3) => {
+    /(<a\s+class="services-catalog-card"[\s\S]*?href=")([^"]*?service-(\d{2})\/)("[\s\S]*?<h3\s+class="services-catalog-title">)[\s\S]*?(<\/h3>)/gi,
+    (m, p1, _href, no, p4, p5) => {
       const t = serviceTranslations[no];
       if (!t) return m;
-      return `${p1}${t.title}${p3}`;
+      return `${p1}${_href}${p4}${t.title}${p5}`;
     }
   );
 
