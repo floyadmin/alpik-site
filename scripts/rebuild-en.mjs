@@ -436,6 +436,23 @@ function normalizeForPrettyUrls(html, { isEn }) {
 
   // Ensure /en doesn't become //en
   out = out.replace(/href="\/en\//g, 'href="/en/');
+
+  if (isEn) {
+    // EN pages should keep navigation inside /en/ for all internal page links.
+    // UA pages use root paths like /about/; without this, users fall back to UA when navigating.
+    out = out.replace(/href="\/"/g, 'href="/en/"');
+    out = out.replace(/href='\/'/g, "href='/en/'");
+
+    out = out.replace(
+      /href="\/(about|contacts|our-services|our-projects|service-\d{2})\/?"/g,
+      (_m, slug) => `href="/en/${slug}/"`
+    );
+    out = out.replace(
+      /href='\/(about|contacts|our-services|our-projects|service-\d{2})\/?'/g,
+      (_m, slug) => `href='/en/${slug}/'`
+    );
+  }
+
   return out;
 }
 
