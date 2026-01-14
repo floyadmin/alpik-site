@@ -1,0 +1,106 @@
+# Pretty-url redirects
+/index.html  /  301
+/en/index.html  /en/  301
+/en  /en/  301
+
+# Generic .html -> / redirects (keep index.html rules above)
+/:page.html  /:page/  301
+/en/:page.html  /en/:page/  301
+
+# Directory index rewrites
+/  /index.html  200
+/en/  /en/index.html  200
+
+# Pretty URLs (UA)
+/about  /about/  301
+/about/  /about.html  200
+/contacts  /contacts/  301
+/contacts/  /contacts.html  200
+/our-services  /our-services/  301
+/our-services/  /our-services.html  200
+/our-projects  /our-projects/  301
+/our-projects/  /our-projects.html  200
+
+/service-01  /service-01/  301
+/service-01/  /service-01.html  200
+/service-02  /service-02/  301
+/service-02/  /service-02.html  200
+/service-03  /service-03/  301
+/service-03/  /service-03.html  200
+/service-04  /service-04/  301
+/service-04/  /service-04.html  200
+/service-05  /service-05/  301
+/service-05/  /service-05.html  200
+/service-06  /service-06/  301
+/service-06/  /service-06.html  200
+/service-07  /service-07/  301
+/service-07/  /service-07.html  200
+/service-08  /service-08/  301
+/service-08/  /service-08.html  200
+/service-09  /service-09/  301
+/service-09/  /service-09.html  200
+/service-10  /service-10/  301
+/service-10/  /service-10.html  200
+/service-11  /service-11/  301
+/service-11/  /service-11.html  200
+/service-12  /service-12/  301
+/service-12/  /service-12.html  200
+/service-13  /service-13/  301
+/service-13/  /service-13.html  200
+/service-14  /service-14/  301
+/service-14/  /service-14.html  200
+/service-15  /service-15/  301
+/service-15/  /service-15.html  200
+/service-16  /service-16/  301
+/service-16/  /service-16.html  200
+/service-17  /service-17/  301
+/service-17/  /service-17.html  200
+/service-18  /service-18/  301
+/service-18/  /service-18.html  200
+
+# Pretty URLs (EN)
+/en/about  /en/about/  301
+/en/about/  /en/about.html  200
+/en/contacts  /en/contacts/  301
+/en/contacts/  /en/contacts.html  200
+/en/our-services  /en/our-services/  301
+/en/our-services/  /en/our-services.html  200
+/en/our-projects  /en/our-projects/  301
+/en/our-projects/  /en/our-projects.html  200
+
+/en/service-01  /en/service-01/  301
+/en/service-01/  /en/service-01.html  200
+/en/service-02  /en/service-02/  301
+/en/service-02/  /en/service-02.html  200
+/en/service-03  /en/service-03/  301
+/en/service-03/  /en/service-03.html  200
+/en/service-04  /en/service-04/  301
+/en/service-04/  /en/service-04.html  200
+/en/service-05  /en/service-05/  301
+/en/service-05/  /en/service-05.html  200
+/en/service-06  /en/service-06/  301
+/en/service-06/  /en/service-06.html  200
+/en/service-07  /en/service-07/  301
+/en/service-07/  /en/service-07.html  200
+/en/service-08  /en/service-08/  301
+/en/service-08/  /en/service-08.html  200
+/en/service-09  /en/service-09/  301
+/en/service-09/  /en/service-09.html  200
+/en/service-10  /en/service-10/  301
+/en/service-10/  /en/service-10.html  200
+/en/service-11  /en/service-11/  301
+/en/service-11/  /en/service-11.html  200
+/en/service-12  /en/service-12/  301
+/en/service-12/  /en/service-12.html  200
+/en/service-13  /en/service-13/  301
+/en/service-13/  /en/service-13.html  200
+/en/service-14  /en/service-14/  301
+/en/service-14/  /en/service-14.html  200
+/en/service-15  /en/service-15/  301
+/en/service-15/  /en/service-15.html  200
+/en/service-16  /en/service-16/  301
+/en/service-16/  /en/service-16.html  200
+/en/service-17  /en/service-17/  301
+/en/service-17/  /en/service-17.html  200
+/en/service-18  /en/service-18/  301
+/en/service-18/  /en/service-18.html  200

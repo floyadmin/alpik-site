@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacts — alpiK</title>
+    <link rel="stylesheet" href="/style.css">
+<!-- i18n-seo:start -->
+<link rel="canonical" href="https://alpik.com.ua/en/contacts/">
+<link rel="alternate" hreflang="uk" href="https://alpik.com.ua/contacts/">
+<link rel="alternate" hreflang="en" href="https://alpik.com.ua/en/contacts/">
+<link rel="alternate" hreflang="x-default" href="https://alpik.com.ua/contacts/">
+<!-- i18n-seo:end -->
+</head>
+<body>
+    <header class="main-header">
+        <!-- header-top with phone removed -->
+        <div class="header-main">
+            <div class="container header-main-inner">
+                <div class="logo-block">
+                    <a href="/" class="logo-link" aria-label="Home">
+                        <img src="/img/logo1.png" alt="ALPIK" class="logo-img" />
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about/">About</a></li>
+                        <li><a href="/our-services/">Services</a></li>
+                        <!--<li><a href="/our-projects/">Projects</a></li>-->
+                        <li><a href="/contacts/">Contacts</a></li>
+                    </ul>
+                </nav>
+                <button class="mobile-menu-btn" aria-label="Open menu">&#9776;</button>
+            </div>
+        </div>
+        <nav class="mobile-nav" id="mobileNav">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about/">About</a></li>
+                <li><a href="/our-services/">Services</a></li>
+                <!--<li><a href="/our-projects/">Projects</a></li>-->
+                <li><a href="/contacts/">Contacts</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="main-header-spacer"></div>
+    <main>
+        <section class="contacts-page" aria-label="Contacts">
+            <div class="contacts-page-bg" aria-hidden="true"></div>
+            <div class="container contacts-page-inner">
+                <header class="contacts-page-header">
+                    <h1 class="contacts-page-title">Contacts</h1>
+                    <div class="contacts-page-divider" aria-hidden="true"><span></span></div>
+                </header>
+
+                <div class="contacts-card">
+                    <div class="contacts-card-media" role="img" aria-label="Work photos"></div>
+
+                    <div class="contacts-card-body">
+                        <h2 class="contacts-card-heading">Phone:</h2>
+                        <a class="contacts-card-phone" href="tel:+380731265006">+380 73 126 5006</a>
+
+                        <div class="contacts-card-icons" aria-label="Messengers">
+                            <a href="viber://chat?number=%2B380731265006" aria-label="Message on Viber" title="Viber">
+                                <img src="/img/viber.svg" alt="Viber" />
+                            </a>
+                            <a href="https://t.me/NovachenkoAlik" target="_blank" rel="noopener" aria-label="Message on Telegram" title="Telegram">
+                                <img src="/img/telegram.svg" alt="Telegram" />
+                            </a>
+                        </div>
+
+                        <p class="contacts-card-line">E-mail: <a href="mailto:roofexpertlv@gmail.com">123416@gmail.com</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="main-footer">
+        <div class="container footer-inner">
+            <div class="footer-grid">
+                <div class="footer-col footer-contacts">
+                    <h3 class="footer-title">Contacts</h3>
+                    <ul class="footer-contacts-list">
+                        <li>
+                            <a class="footer-link" href="tel:+380731265006">
+                                <span class="footer-icon" aria-hidden="true">📞</span>
+                                +380 73 126 5006
+                            </a>
+                        </li>
+                        <li>
+                            <a class="footer-link" href="mailto:roofexpertlv@gmail.com">
+                                <span class="footer-icon" aria-hidden="true">✉</span>
+                                roofexpertlv@gmail.com
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <nav class="footer-col footer-nav" aria-label="Pages">
+                    <h3 class="footer-title">Pages</h3>
+                    <ul class="footer-nav-list">
+                        <li><a class="footer-link" href="/">Home</a></li>
+                        <li><a class="footer-link" href="/about/">About</a></li>
+                        <li><a class="footer-link" href="/our-services/">Services</a></li>
+                        <!--<li><a class="footer-link" href="/our-projects/">Projects</a></li>-->
+                        <li><a class="footer-link" href="/contacts/">Contacts</a></li>
+                    </ul>
+                </nav>
+
+                <div class="footer-col footer-brand" aria-label="Logo">
+                    <a href="/" class="footer-logo-link" aria-label="Home">
+                        <img src="/img/logo1.png" alt="ALPIK" class="footer-logo" loading="lazy" />
+                    </a>
+                </div>
+            </div>
+
+            <p class="footer-copy">&copy; 2026 alpiK. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+    // Mobile menu
+    const mobileBtn = document.querySelector('.mobile-menu-btn');
+    const mobileNav = document.getElementById('mobileNav');
+    if (mobileBtn && mobileNav) {
+        mobileBtn.addEventListener('click', function() {
+            mobileNav.classList.toggle('open');
+        });
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileNav.classList.remove('open');
+            });
+        });
+        document.addEventListener('click', function(e) {
+            if (!mobileNav.contains(e.target) && !mobileBtn.contains(e.target)) {
+                mobileNav.classList.remove('open');
+            }
+        });
+    }
+    </script>
+    <script src="/lang-switcher.js" defer></script>
+    <script src="/tracking.js" defer></script>
+</body>
+</html>

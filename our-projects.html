@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Наші проекти — alpiK</title>
+    <link rel="stylesheet" href="/style.css">
+<!-- i18n-seo:start -->
+<link rel="canonical" href="https://alpik.com.ua/our-projects/">
+<link rel="alternate" hreflang="uk" href="https://alpik.com.ua/our-projects/">
+<link rel="alternate" hreflang="en" href="https://alpik.com.ua/en/our-projects/">
+<link rel="alternate" hreflang="x-default" href="https://alpik.com.ua/our-projects/">
+<!-- i18n-seo:end -->
+</head>
+<body>
+    <header class="main-header">
+        <!-- header-top с телефоном удалён -->
+        <div class="header-main">
+            <div class="container header-main-inner">
+                <div class="logo-block">
+                    <a href="/" class="logo-link" aria-label="На головну">
+                        <img src="/img/logo1.png" alt="ALPIK" class="logo-img" />
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="/">Головна</a></li>
+                        <li><a href="/about/">Про компанію</a></li>
+                        <li><a href="/our-services/">Наші послуги</a></li>
+                        <li><a href="/our-projects/">Наші проекти</a></li>
+                        <li><a href="/contacts/">Контакти</a></li>
+                    </ul>
+                </nav>
+                <button class="mobile-menu-btn" aria-label="Відкрити меню">&#9776;</button>
+            </div>
+        </div>
+        <nav class="mobile-nav" id="mobileNav">
+            <ul>
+                <li><a href="/">Головна</a></li>
+                <li><a href="/about/">Про компанію</a></li>
+                <li><a href="/our-services/">Наші послуги</a></li>
+                <li><a href="/our-projects/">Наші проекти</a></li>
+                <li><a href="/contacts/">Контакти</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="main-header-spacer"></div>
+    <main>
+        <section class="projects">
+            <div class="container">
+                <h1>Наші проекти</h1>
+                <p>Тут буде галерея реалізованих проектів з фото-заглушками.</p>
+                <div class="gallery-list">
+                    <img src="/img/gallery1.jpg" alt="Проект 1">
+                    <img src="/img/gallery2.jpg" alt="Проект 2">
+                    <img src="/img/gallery3.jpg" alt="Проект 3">
+                    <img src="/img/gallery4.jpg" alt="Проект 4">
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="main-footer">
+        <div class="container footer-inner">
+            <div class="footer-grid">
+                <div class="footer-col footer-contacts">
+                    <h3 class="footer-title">Контакти</h3>
+                    <ul class="footer-contacts-list">
+                        <li>
+                            <a class="footer-link" href="tel:+380731265006">
+                                <span class="footer-icon" aria-hidden="true">📞</span>
+                                +380 73 126 5006
+                            </a>
+                        </li>
+                        <li>
+                            <a class="footer-link" href="mailto:roofexpertlv@gmail.com">
+                                <span class="footer-icon" aria-hidden="true">✉</span>
+                                roofexpertlv@gmail.com
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <nav class="footer-col footer-nav" aria-label="Категорії">
+                    <h3 class="footer-title">Категорії</h3>
+                    <ul class="footer-nav-list">
+                        <li><a class="footer-link" href="/">Головна</a></li>
+                        <li><a class="footer-link" href="/about/">Про компанію</a></li>
+                        <li><a class="footer-link" href="/our-services/">Наші послуги</a></li>
+                        <li><a class="footer-link" href="/our-projects/">Наші проекти</a></li>
+                        <li><a class="footer-link" href="/contacts/">Контакти</a></li>
+                    </ul>
+                </nav>
+
+                <div class="footer-col footer-brand" aria-label="Логотип">
+                    <a href="/" class="footer-logo-link" aria-label="На головну">
+                        <img src="/img/logo1.png" alt="ALPIK" class="footer-logo" loading="lazy" />
+                    </a>
+                </div>
+            </div>
+
+            <p class="footer-copy">&copy; 2026 alpiK. Всі права захищені.</p>
+        </div>
+    </footer>
+
+    <script>
+    // Мобільне меню
+    const mobileBtn = document.querySelector('.mobile-menu-btn');
+    const mobileNav = document.getElementById('mobileNav');
+    if (mobileBtn && mobileNav) {
+        mobileBtn.addEventListener('click', function() {
+            mobileNav.classList.toggle('open');
+        });
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileNav.classList.remove('open');
+            });
+        });
+        document.addEventListener('click', function(e) {
+            if (!mobileNav.contains(e.target) && !mobileBtn.contains(e.target)) {
+                mobileNav.classList.remove('open');
+            }
+        });
+    }
+    </script>
+    <script src="/lang-switcher.js" defer></script>
+</body>
+</html>
