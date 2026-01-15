@@ -122,6 +122,206 @@ function injectI18nSeo(html, routePath) {
   return out;
 }
 
+function injectMetaKeywords(html, routePath) {
+  if (!routePath) return html;
+
+  function escapeAttr(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function textFromTag(source, tagName) {
+    const re = new RegExp(`<${tagName}\\b[^>]*>([\\s\\S]*?)<\\/${tagName}>`, 'i');
+    const m = source.match(re);
+    if (!m) return '';
+    return m[1]
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function textFromClass(source, className) {
+    const re = new RegExp(`class=["'][^"']*\\b${className}\\b[^"']*["'][^>]*>([\\s\\S]*?)<`, 'i');
+    const m = source.match(re);
+    if (!m) return '';
+    return m[1]
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function clampDescription(value) {
+    const v = String(value || '').replace(/\s+/g, ' ').trim();
+    if (!v) return '';
+    if (v.length <= 160) return v;
+    return v.slice(0, 157).replace(/\s+\S*$/g, '').trim() + '…';
+  }
+
+  const isEn = routePath === '/en/' || routePath.startsWith('/en/');
+  const uaPath = isEn ? routePath.replace(/^\/en/, '') : routePath;
+
+  const ua = {
+    '/': {
+      description:
+        'Висотні роботи та промисловий альпінізм у Києві та області: фасадні роботи, клінінг, монтаж і ремонт на висоті. Безпечно, якісно, в узгоджені терміни.',
+      keywords:
+        'промисловий альпінізм київ, висотні роботи, фасадні роботи, ремонт фасаду, мийка фасаду, клінінг, миття вікон, монтаж на висоті, демонтаж, ремонт даху, монтаж сонячних панелей'
+    },
+    '/our-services/': {
+      description:
+        'Перелік послуг alpiK: фасадні роботи, клінінг, монтаж, демонтаж, ремонт і обслуговування промислових об’єктів та будівель у Києві й області.',
+      keywords:
+        'послуги промислового альпінізму, висотні роботи київ, фасадні роботи, клінінг київ, монтаж сонячних панелей, ремонт димових труб, демонтаж металоконструкцій'
+    },
+    '/service-02/': {
+      description:
+        'Фасадні роботи: ремонт, оздоблення, фарбування та гідрофобізація. Професійно виконуємо роботи на висоті у Києві та області.',
+      keywords:
+        'фасадні роботи київ, ремонт фасаду, фарбування фасаду, гідрофобізація фасаду, утеплення фасаду, промисловий альпінізм'
+    },
+    '/service-15/': {
+      description:
+        'Клінінг на висоті: миття фасадів, вікон та промислових цехів. Безпечні роботи на висоті у Києві та області.',
+      keywords:
+        'клінінг київ, миття фасадів, миття вікон, промисловий клінінг, висотне миття, мийка фасаду альпіністами'
+    },
+    '/service-16/': {
+      description:
+        'Монтаж сонячних панелей та інверторів: кріплення, прокладання кабелів і безпечне підключення. Роботи на покрівлях і фасадах у Києві та області.',
+      keywords:
+        'монтаж сонячних панелей київ, встановлення сонячних панелей, монтаж інвертора, сонячна електростанція під ключ, монтаж на даху'
+    },
+    '/solar-panels/': {
+      description:
+        'Сонячні панелі та інвертори: монтаж на дахах і фасадах, безпечні висотні роботи та акуратне підключення обладнання.',
+      keywords:
+        'сонячні панелі київ, монтаж сонячних панелей, інвертор, сонячна електростанція, монтаж на висоті'
+    },
+    '/contacts/': {
+      description:
+        'Контакти alpiK: замовити консультацію щодо висотних робіт, фасадних робіт, клінінгу та монтажу у Києві та області.',
+      keywords:
+        'контакти alpiK, промисловий альпінізм контакти, висотні роботи замовити'
+    },
+    '/montage/': {
+      description:
+        'Монтажні роботи на висоті: димоходи, водостоки, фасадні системи, світлопрозорі конструкції та інше. Київ і область.',
+      keywords:
+        'монтажні роботи на висоті, монтаж водостоків, монтаж димоходів, монтаж фасадних систем, промисловий альпінізм'
+    },
+    '/repair/': {
+      description:
+        'Ремонтні роботи на висоті: димові труби, елеватори, силоси, дахи. Безпечно виконуємо ремонт та відновлення у Києві й області.',
+      keywords:
+        'ремонт на висоті, ремонт димових труб, ремонт елеваторів, ремонт силосів, ремонт даху'
+    }
+  };
+
+  const en = {
+    '/en/': {
+      description:
+        'Rope access and high-altitude works in Kyiv region: facade works, cleaning, installation and repairs at height. Safe and on time.',
+      keywords:
+        'rope access Kyiv, high-altitude works, facade works, facade repair, facade cleaning, industrial cleaning, solar panel installation, roof repairs'
+    },
+    '/en/our-services/': {
+      description:
+        'Our services: facade works, industrial cleaning, installation, dismantling and repair of industrial sites and buildings in Kyiv region.',
+      keywords:
+        'rope access services, high-altitude works Kyiv, facade works, industrial cleaning, solar panel installation, chimney repair'
+    },
+    '/en/service-02/': {
+      description:
+        'Facade works: repair, finishing, painting and hydrophobic protection. Professional rope access team in Kyiv region.',
+      keywords:
+        'facade works Kyiv, facade repair, facade painting, hydrophobic protection, rope access'
+    },
+    '/en/service-15/': {
+      description:
+        'Industrial cleaning at height: washing facades, windows and production areas. Safe rope access works in Kyiv region.',
+      keywords:
+        'industrial cleaning Kyiv, facade washing, window cleaning, rope access cleaning'
+    },
+    '/en/service-16/': {
+      description:
+        'Solar panels & inverters installation: mounting, cable routing and safe connection on roofs and facades in Kyiv region.',
+      keywords:
+        'solar panel installation Kyiv, inverter installation, rooftop solar, turnkey solar'
+    },
+    '/en/solar-panels/': {
+      description:
+        'Solar panels & inverters: safe installation on roofs and facades, neat wiring and equipment connection.',
+      keywords:
+        'solar panels Kyiv, solar installation, inverter, rooftop solar'
+    },
+    '/en/contacts/': {
+      description:
+        'Contacts: request a consultation for rope access, facade works, cleaning and installation in Kyiv region.',
+      keywords:
+        'contacts, rope access consultation, high-altitude works'
+    }
+  };
+
+  const map = isEn ? en : ua;
+  const key = isEn ? routePath : uaPath;
+  const meta = map[key];
+
+  const titleText = textFromTag(html, 'title').replace(/\s*[—\-]\s*alpiK\s*$/i, '').trim();
+  const h1Text = textFromTag(html, 'h1');
+  const heroSubtitle = textFromClass(html, 'hero-subtitle');
+  const leadText = textFromClass(html, 'services-catalog-lead');
+
+  const defaultUk = {
+    description: clampDescription(heroSubtitle || leadText || titleText),
+    keywords: 'промисловий альпінізм, висотні роботи, Київ, alpiK'
+  };
+
+  const defaultEn = {
+    description: clampDescription(heroSubtitle || leadText || titleText),
+    keywords: 'rope access, high-altitude works, Kyiv, alpiK'
+  };
+
+  const chosen = meta || (isEn ? defaultEn : defaultUk);
+  const description = clampDescription(chosen.description || titleText);
+
+  const keywordParts = [];
+  if (h1Text) keywordParts.push(h1Text);
+  if (titleText && titleText !== h1Text) keywordParts.push(titleText);
+  keywordParts.push(chosen.keywords);
+
+  const keywords = Array.from(
+    new Set(
+      keywordParts
+        .join(', ')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    )
+  )
+    .slice(0, 18)
+    .join(', ');
+
+  let out = html;
+  out = out.replace(/\s*<meta\b[^>]*\bname\s*=\s*["']description["'][^>]*>\s*/gi, '\r\n');
+  out = out.replace(/\s*<meta\b[^>]*\bname\s*=\s*["']keywords["'][^>]*>\s*/gi, '\r\n');
+
+  const headBlock = [
+    '<!-- seo-meta:start -->',
+    `<meta name="description" content="${escapeAttr(description)}">`,
+    `<meta name="keywords" content="${escapeAttr(keywords)}">`,
+    '<!-- seo-meta:end -->'
+  ].join('\r\n');
+
+  out = out.replace(/\s*<!-- seo-meta:start -->[\s\S]*?<!-- seo-meta:end -->\s*/g, '\r\n');
+  out = out.replace(/<\/head>/i, `${headBlock}\r\n</head>`);
+  return out;
+}
+
 function optimizeImgTags(html) {
   let out = html;
 
@@ -186,7 +386,9 @@ function copyHtml(srcPath, destPath) {
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
   const html = fs.readFileSync(srcPath, 'utf8');
   let out = html;
-  out = injectI18nSeo(out, routeFromDestPath(destPath));
+  const routePath = routeFromDestPath(destPath);
+  out = injectI18nSeo(out, routePath);
+  out = injectMetaKeywords(out, routePath);
   out = optimizeImgTags(out);
   out = injectFavicon(out);
   out = injectGtm(out);
