@@ -9,6 +9,8 @@ const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
 const enDir = path.join(root, 'en');
 
+const SITE_BASE_URL = (process.env.SITE_BASE_URL || 'https://alpik-kyiv.com').trim().replace(/\/+$/g, '');
+
 const GTM_ID = (process.env.SITE_GTM_ID || '').trim();
 const GADS_ID = (process.env.SITE_GADS_ID || '').trim();
 
@@ -72,6 +74,50 @@ function injectFavicon(html) {
   // Remove any existing icon declarations so we can enforce the optimized set.
   out = out.replace(/\s*<link\b[^>]*\brel=["'](?:shortcut\s+icon|icon|apple-touch-icon)["'][^>]*>\s*/gi, '\r\n');
   out = out.replace(/\s*<!-- favicon:start -->[\s\S]*?<!-- favicon:end -->\s*/g, '\r\n');
+  out = out.replace(/<\/head>/i, `${headBlock}\r\n</head>`);
+  return out;
+}
+
+function routeFromDestPath(destPath) {
+  const rel = path.relative(dist, destPath).split(path.sep).join('/');
+  if (!rel) return null;
+
+  if (rel.toLowerCase() === 'index.html') return '/';
+
+  if (rel.toLowerCase().endsWith('/index.html')) {
+    const dir = rel.slice(0, -'/index.html'.length);
+    return `/${dir}/`;
+  }
+
+  if (rel.toLowerCase().endsWith('.html')) {
+    const withoutExt = rel.slice(0, -'.html'.length);
+    return `/${withoutExt}/`;
+  }
+
+  return null;
+}
+
+function injectI18nSeo(html, routePath) {
+  if (!routePath) return html;
+  if (!SITE_BASE_URL) return html;
+
+  let out = html;
+  out = out.replace(/\s*<!-- i18n-seo:start -->[\s\S]*?<!-- i18n-seo:end -->\s*/g, '\r\n');
+
+  const isEn = routePath === '/en/' || routePath.startsWith('/en/');
+  const uaPath = isEn ? routePath.replace(/^\/en/, '') : routePath;
+  const enPath = isEn ? routePath : (uaPath === '/' ? '/en/' : `/en${uaPath}`);
+  const canonicalPath = isEn ? enPath : uaPath;
+
+  const headBlock = [
+    '<!-- i18n-seo:start -->',
+    `<link rel="canonical" href="${SITE_BASE_URL}${canonicalPath}">`,
+    `<link rel="alternate" hreflang="uk" href="${SITE_BASE_URL}${uaPath}">`,
+    `<link rel="alternate" hreflang="en" href="${SITE_BASE_URL}${enPath}">`,
+    `<link rel="alternate" hreflang="x-default" href="${SITE_BASE_URL}${uaPath}">`,
+    '<!-- i18n-seo:end -->'
+  ].join('\r\n');
+
   out = out.replace(/<\/head>/i, `${headBlock}\r\n</head>`);
   return out;
 }
@@ -140,6 +186,7 @@ function copyHtml(srcPath, destPath) {
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
   const html = fs.readFileSync(srcPath, 'utf8');
   let out = html;
+  out = injectI18nSeo(out, routeFromDestPath(destPath));
   out = optimizeImgTags(out);
   out = injectFavicon(out);
   out = injectGtm(out);

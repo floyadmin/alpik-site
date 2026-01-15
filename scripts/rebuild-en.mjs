@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, '..');
 const enDir = path.join(root, 'en');
 
-const BASE_URL = 'https://alpik.com.ua';
+const BASE_URL = 'https://alpik-kyiv.com';
 const GTM_ID = (process.env.SITE_GTM_ID || '').trim();
 
 const serviceTranslations = {
