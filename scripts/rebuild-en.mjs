@@ -144,11 +144,11 @@ const serviceTranslations = {
     ]
   },
   '17': {
-    title: 'Sealing interpanel joints',
-    subtitle: 'We restore tightness of facade joints to prevent drafts, moisture and heat losses.',
+    title: 'Power cable installation',
+    subtitle: 'Cable routing and secure fastening on facades and industrial structures with strict safety compliance.',
     paragraphs: [
-      'We seal interpanel joints on residential and industrial buildings to protect from moisture penetration, drafts and heat loss.',
-      'Works include cleaning the seam, replacing/adding insulation, applying sealant and protective layers for long‑term tightness.'
+      'Power cable installation at height requires careful route planning, reliable fastening and strict safety measures. We work where aerial lifts are hard to use, using rope access when needed.',
+      'We provide neat cable routing along facades and steel structures, install mounts and organize safe pass‑throughs so the line is protected from mechanical damage and weather exposure.'
     ]
   },
   '18': {
@@ -166,6 +166,9 @@ const pageTranslations = {
     ['<!-- Секция: Наші послуги (overview) -->', '<!-- Section: Our services (overview) -->'],
     ['Більше 1000 клієнтів вже довірилися нам', 'More than 1000 clients have already trusted us'],
     ['Якісне виконання висотних робіт', 'High-quality work at height'],
+    ['Висотні роботи будь-якої складності — коли інші не можуть, ми виконуємо', 'Rope access work of any complexity — when others can\u2019t, we get it done'],
+    ['Фасадні роботи, промисловий альпінізм, монтаж і демонтаж на висоті.', 'Facade work, industrial rope access, installation and dismantling at height.'],
+    ['Працюємо там, де інші відмовляються.', 'We work where others refuse.'],
     ['Клієнти оцінили професіоналізм «alpiK»,', 'Clients appreciate the professionalism of “alpiK”,'],
     ['адже наші відносини побудовані на', 'because our relationships are built on'],
     ['партнерстві та довірі', 'partnership and trust'],
@@ -343,6 +346,15 @@ const pageTranslations = {
   ],
   'montage.html': [
     ['<title>Монтажні роботи — alpiK</title>', '<title>Installation works — alpiK</title>'],
+    ['aria-label="Фото робіт"', 'aria-label="Work photos"'],
+    ['<h2 class="section-title">Фото робіт</h2>', '<h2 class="section-title">Work photos</h2>'],
+    ['Приклади монтажних робіт на висоті.', 'Examples of installation work at height.'],
+    ['alt="Фото робіт 1"', 'alt="Work photo 1"'],
+    ['alt="Фото робіт 2"', 'alt="Work photo 2"'],
+    ['alt="Фото робіт 3"', 'alt="Work photo 3"'],
+    ['alt="Фото робіт 4"', 'alt="Work photo 4"'],
+    ['alt="Фото робіт 5"', 'alt="Work photo 5"'],
+    ['alt="Фото робіт 6"', 'alt="Work photo 6"'],
     ['Монтажні роботи', 'Installation works'],
     ['Виконуємо монтажні роботи на висоті та промислових об’єктах: від водостоків і фасадних систем до світлопрозорих конструкцій.',
       'We deliver installation works at height and on industrial sites: from gutters and facade systems to translucent structures.'],

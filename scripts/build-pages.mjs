@@ -58,6 +58,62 @@ function injectGtm(html) {
   return out;
 }
 
+function injectFavicon(html) {
+  const headBlock = [
+    '<!-- favicon:start -->',
+    '<link rel="preload" as="image" href="/img/logo1-optimized.webp" fetchpriority="high">',
+    '<link rel="preload" as="image" href="/img/logo1-optimized.png" fetchpriority="high">',
+    '<link rel="icon" href="/img/favicon-32.png" type="image/png">',
+    '<link rel="apple-touch-icon" href="/img/apple-touch-icon-180.png">',
+    '<!-- favicon:end -->'
+  ].join('\r\n');
+
+  let out = html;
+  // Remove any existing icon declarations so we can enforce the optimized set.
+  out = out.replace(/\s*<link\b[^>]*\brel=["'](?:shortcut\s+icon|icon|apple-touch-icon)["'][^>]*>\s*/gi, '\r\n');
+  out = out.replace(/\s*<!-- favicon:start -->[\s\S]*?<!-- favicon:end -->\s*/g, '\r\n');
+  out = out.replace(/<\/head>/i, `${headBlock}\r\n</head>`);
+  return out;
+}
+
+function optimizeImgTags(html) {
+  let out = html;
+
+  // Header logo: use <picture> with WebP + lightweight PNG fallback.
+  out = out.replace(/<img\b([^>]*\bclass\s*=\s*["'][^"']*\blogo-img\b[^"']*["'][^>]*)>/gi, (m, attrs) => {
+    let a = attrs.replace(/\s*\/\s*$/i, '');
+    a = a.replace(/\bsrc\s*=\s*["']\/img\/logo1\.png["']/i, 'src="/img/logo1-optimized.png"');
+    if (!/\bfetchpriority\s*=\s*/i.test(a)) a += ' fetchpriority="high"';
+    return [
+      '<picture class="logo-picture">',
+      '  <source type="image/webp" srcset="/img/logo1-optimized.webp">',
+      `  <img${a}>`,
+      '</picture>'
+    ].join('');
+  });
+
+  // Footer logo: same idea, but no fetchpriority.
+  out = out.replace(/<img\b([^>]*\bclass\s*=\s*["'][^"']*\bfooter-logo\b[^"']*["'][^>]*)>/gi, (m, attrs) => {
+    let a = attrs.replace(/\s*\/\s*$/i, '');
+    a = a.replace(/\bsrc\s*=\s*["']\/img\/logo1\.png["']/i, 'src="/img/logo1-optimized.png"');
+    return [
+      '<picture class="footer-logo-picture">',
+      '  <source type="image/webp" srcset="/img/logo1-optimized.webp">',
+      `  <img${a}>`,
+      '</picture>'
+    ].join('');
+  });
+
+  // Add non-blocking decode for all images (safe default). Handle "<img ... />".
+  out = out.replace(/<img\b([^>]*?)>/gi, (m, attrs) => {
+    if (/\bdecoding\s*=\s*/i.test(attrs)) return m;
+    const cleaned = attrs.replace(/\s*\/\s*$/i, '');
+    return `<img${cleaned} decoding="async">`;
+  });
+
+  return out;
+}
+
 function run(cmd, args, options = {}) {
   const res = spawnSync(cmd, args, {
     cwd: root,
@@ -84,6 +140,8 @@ function copyHtml(srcPath, destPath) {
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
   const html = fs.readFileSync(srcPath, 'utf8');
   let out = html;
+  out = optimizeImgTags(out);
+  out = injectFavicon(out);
   out = injectGtm(out);
   out = injectGoogleAdsTag(out);
   fs.writeFileSync(destPath, out, 'utf8');
@@ -133,6 +191,7 @@ function writePrettyUrlCopy(htmlFileName, srcFilePath, destBaseDir) {
 }
 
 // 1) Rebuild /en from UA sources (and inject SEO/switcher)
+run('node', [path.join(root, 'scripts', 'optimize-images.mjs')]);
 run('node', [path.join(root, 'scripts', 'rebuild-en.mjs')]);
 
 // 2) Prepare dist/
