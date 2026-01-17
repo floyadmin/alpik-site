@@ -54,6 +54,15 @@ function normalizeRelativeImgPaths(html) {
   return out;
 }
 
+function rewriteHeavyPngPhotosToJpeg(html) {
+  // These PNGs are photo-like and huge; we generate .jpg equivalents in optimize-images.mjs.
+  // Rewrite URLs so the site downloads much smaller images on mobile.
+  let out = html;
+  out = out.replace(/\/(img\/montazh)\.png(\?[^"')\s>]*)?/gi, '/$1.jpg');
+  out = out.replace(/\/(img\/painting)\.png(\?[^"')\s>]*)?/gi, '/$1.jpg');
+  return out;
+}
+
 function injectImageVersions(html) {
   let out = html;
 
@@ -659,6 +668,19 @@ function optimizeImgTags(html) {
     return `<img${cleaned} decoding="async">`;
   });
 
+  // Add explicit dimensions for the biggest above-the-fold gallery/thumb images to reduce CLS.
+  // (Dimensions are the source image pixels; layout still controlled by CSS.)
+  out = out.replace(/<img\b([^>]*\bsrc\s*=\s*["']\/img\/(?:montazh|painting)\.jpg(?:\?[^"']*)?["'][^>]*)>/gi, (m, attrs) => {
+    let a = attrs;
+    if (/\bwidth\s*=\s*/i.test(a) || /\bheight\s*=\s*/i.test(a)) return m;
+
+    const isMontazh = /\bsrc\s*=\s*["']\/img\/montazh\.jpg/i.test(a);
+    const width = isMontazh ? 1536 : 1024;
+    const height = isMontazh ? 1024 : 1536;
+    a = a.replace(/\s*\/\s*$/i, '');
+    return `<img${a} width="${width}" height="${height}">`;
+  });
+
   return out;
 }
 
@@ -691,8 +713,9 @@ function copyHtml(srcPath, destPath) {
   const routePath = routeFromDestPath(destPath);
   out = injectI18nSeo(out, routePath);
   out = injectMetaKeywords(out, routePath);
-  out = optimizeImgTags(out);
   out = normalizeRelativeImgPaths(out);
+  out = rewriteHeavyPngPhotosToJpeg(out);
+  out = optimizeImgTags(out);
   out = injectFavicon(out);
   out = injectGtm(out);
   out = injectGoogleTag(out);

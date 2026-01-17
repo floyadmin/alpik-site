@@ -73,6 +73,36 @@ async function buildHeroBackgroundWebps() {
   }
 }
 
+async function buildJpegsFromHeavyPngs() {
+  // Some large PNGs are photos without alpha; JPEG is much smaller.
+  // Keep original .png in place (fallback / existing references), but generate .jpg and let the build rewrite references.
+  const items = [
+    { in: 'montazh.png', out: 'montazh.jpg', width: 1600, quality: 78 },
+    { in: 'painting.png', out: 'painting.jpg', width: 1600, quality: 78 }
+  ];
+
+  for (const item of items) {
+    const src = path.join(imgDir, item.in);
+    const dst = path.join(imgDir, item.out);
+    if (!exists(src)) continue;
+
+    try {
+      const meta = await sharp(src).metadata();
+      if (meta && meta.hasAlpha) {
+        // Don't convert PNGs with alpha to JPEG.
+        continue;
+      }
+
+      await sharp(src)
+        .resize({ width: item.width, withoutEnlargement: true })
+        .jpeg({ quality: item.quality, progressive: true, mozjpeg: true })
+        .toFile(dst);
+    } catch (err) {
+      console.warn('JPEG build skipped for', item.in, String(err && err.message ? err.message : err));
+    }
+  }
+}
+
 function listHtmlFiles(dirPath) {
   const out = [];
   if (!exists(dirPath)) return out;
@@ -145,6 +175,8 @@ async function optimizeHeroImagesFromHtml() {
   }
 
   const maxWidth = 1600;
+  const maxBytesJpeg = 450 * 1024;
+  const maxBytesPng = 650 * 1024;
 
   for (const rel of relPaths) {
     const abs = path.join(root, rel);
@@ -153,12 +185,26 @@ async function optimizeHeroImagesFromHtml() {
     const ext = path.extname(abs).toLowerCase();
     if (!['.jpg', '.jpeg', '.png'].includes(ext)) continue;
 
+    let stat;
+    try {
+      stat = fs.statSync(abs);
+    } catch {
+      continue;
+    }
+    if (!stat.isFile()) continue;
+
     const tmp = abs + '.tmp';
     try {
       const img = sharp(abs);
       const meta = await img.metadata();
       const width = meta && meta.width ? meta.width : null;
       const shouldResize = !!(width && width > maxWidth);
+
+      // Avoid re-encoding already-optimized assets on every build.
+      const byteLimit = ext === '.png' ? maxBytesPng : maxBytesJpeg;
+      if (!shouldResize && stat.size > 0 && stat.size <= byteLimit) {
+        continue;
+      }
 
       let pipeline = sharp(abs);
       if (shouldResize) {
@@ -189,6 +235,7 @@ async function main() {
   ensureDir(imgDir);
   await buildLogoAssets();
   await buildHeroBackgroundWebps();
+  await buildJpegsFromHeavyPngs();
   await optimizeHeroImagesFromHtml();
 }
 
