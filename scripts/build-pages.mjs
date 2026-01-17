@@ -12,30 +12,173 @@ const enDir = path.join(root, 'en');
 const SITE_BASE_URL = (process.env.SITE_BASE_URL || 'https://alpik-kyiv.com').trim().replace(/\/+$/g, '');
 
 const GTM_ID = (process.env.SITE_GTM_ID || '').trim();
+
+// Legacy single-ID env var (kept for backwards compatibility)
 const GADS_ID = (process.env.SITE_GADS_ID || '').trim();
 
-function injectGoogleAdsTag(html) {
-  if (!GADS_ID || !/^AW-\d+$/i.test(GADS_ID)) return html;
+// Prefer SITE_GADS_IDS (comma/space-separated). Default keeps only the new Ads ID.
+const DEFAULT_GADS_IDS = 'AW-17880869861';
+const GADS_IDS_RAW = (process.env.SITE_GADS_IDS ?? (GADS_ID || DEFAULT_GADS_IDS)).trim();
+
+// Disabled by default; set SITE_GA4_ID if you want GA4.
+const GA4_ID = (process.env.SITE_GA4_ID || '').trim();
+
+// Google Ads conversion tracking for interactive phone numbers.
+// Override via SITE_ADS_CONVERSION_CONTACT_SEND_TO if needed.
+const DEFAULT_ADS_CONVERSION_CONTACT_SEND_TO = 'AW-17880869861/EgvzCPSPt-cbEOXXoc5C';
+const ADS_CONVERSION_CONTACT_SEND_TO = (
+  process.env.SITE_ADS_CONVERSION_CONTACT_SEND_TO || DEFAULT_ADS_CONVERSION_CONTACT_SEND_TO
+).trim();
+
+function parseGadsIds(raw) {
+  const parts = String(raw || '')
+    .split(/[\s,]+/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const out = [];
+  for (const id of parts) {
+    if (!/^AW-\d+$/i.test(id)) continue;
+    const norm = id.toUpperCase();
+    if (!out.includes(norm)) out.push(norm);
+  }
+  return out;
+}
+
+function parseGa4Id(raw) {
+  const id = String(raw || '').trim();
+  if (!id) return '';
+  if (!/^G-[A-Z0-9]+$/i.test(id)) return '';
+  return id;
+}
+
+function injectGoogleTag(html) {
+  const ga4Id = parseGa4Id(GA4_ID);
+  const gadsIds = parseGadsIds(GADS_IDS_RAW);
+  if (!ga4Id && gadsIds.length === 0) return html;
+
+  const loaderId = ga4Id || gadsIds[0];
+  const configLines = [];
+  if (ga4Id) configLines.push(`  gtag('config', '${ga4Id}');`);
+  for (const id of gadsIds) configLines.push(`  gtag('config', '${id}');`);
 
   const headBlock = [
-    '<!-- gads:start -->',
+    '<!-- gtag:start -->',
     '<!-- Google tag (gtag.js) -->',
-    `<script async src="https://www.googletagmanager.com/gtag/js?id=${GADS_ID}"></script>`,
+    `<script async src="https://www.googletagmanager.com/gtag/js?id=${loaderId}"></script>`,
     '<script>',
     '  window.dataLayer = window.dataLayer || [];',
     '  function gtag(){dataLayer.push(arguments);} ',
     '  gtag(\'js\', new Date());',
     '',
-    `  gtag(\'config\', '${GADS_ID}');`,
+    ...configLines,
     '</script>',
-    '<!-- gads:end -->'
+    '<!-- gtag:end -->'
   ].join('\r\n');
 
   let out = html;
+  // Clean up any previous variants to avoid duplicate tags on rebuild.
+  out = out.replace(/\s*<!-- gtag:start -->[\s\S]*?<!-- gtag:end -->\s*/g, '\r\n');
+  out = out.replace(/\s*<!-- ga4:start -->[\s\S]*?<!-- ga4:end -->\s*/g, '\r\n');
   out = out.replace(/\s*<!-- gads:start -->[\s\S]*?<!-- gads:end -->\s*/g, '\r\n');
-  out = out.replace(/<\/head>/i, `${headBlock}\r\n</head>`);
+
+  out = out.replace(/<head(\b[^>]*)>/i, `<head$1>\r\n${headBlock}`);
   return out;
 }
+
+function injectAdsContactConversion(html) {
+  if (!ADS_CONVERSION_CONTACT_SEND_TO) return html;
+
+  const headBlock = [
+    '<!-- ads-contact-conversion:start -->',
+    '<!-- Event snippet for Интерактивные номера телефонов conversion page -->',
+    '<script>',
+    '  function gtag_report_conversion(url) {',
+    '    var callback = function () {',
+    '      if (typeof url != "undefined") {',
+    '        window.location = url;',
+    '      }',
+    '    };',
+    '    if (typeof window.gtag !== "function") {',
+    '      callback();',
+    '      return false;',
+    '    }',
+    '    window.gtag("event", "conversion", {',
+    `      "send_to": "${ADS_CONVERSION_CONTACT_SEND_TO}",`,
+    '      "value": 1.0,',
+    '      "currency": "UAH",',
+    '      "event_callback": callback',
+    '    });',
+    '    setTimeout(callback, 1000);',
+    '    return false;',
+    '  }',
+    '',
+    '  (function () {',
+    '    function shouldTrackHref(href) {',
+    '      if (!href) return false;',
+    '      var h = String(href);',
+    '      if (h.indexOf("tel:") === 0) return true;',
+    '      if (h.indexOf("mailto:") === 0) return true;',
+    '      if (h.indexOf("viber://") === 0) return true;',
+    '      if (h.indexOf("tg://") === 0) return true;',
+    '      try {',
+    '        var url0 = new URL(h, window.location.href);',
+    '        var host0 = String(url0.hostname || "").toLowerCase();',
+    '        if (host0 === "t.me" || host0 === "telegram.me") return true;',
+    '        return false;',
+    '      } catch (e) {',
+    '        return false;',
+    '      }',
+    '    }',
+    '',
+    '    function onClick(e) {',
+    '      var a = e.target && e.target.closest ? e.target.closest("a") : null;',
+    '      if (!a) return;',
+    '',
+    '      var href = a.getAttribute("href");',
+    '      if (!shouldTrackHref(href)) return;',
+    '',
+    '      var hs = String(href || "");',
+    '      if (hs.indexOf("tel:") === 0 || hs.indexOf("mailto:") === 0 || hs.indexOf("viber://") === 0 || hs.indexOf("tg://") === 0) {',
+    '        try { gtag_report_conversion(); } catch (err) {}',
+    '        return;',
+    '      }',
+    '',
+    '      try {',
+    '        var url = new URL(hs, window.location.href);',
+    '        var host = String(url.hostname || "").toLowerCase();',
+    '        if (host === "t.me" || host === "telegram.me") {',
+    '          e.preventDefault();',
+    '          gtag_report_conversion(url.href);',
+    '          setTimeout(function () { window.location = url.href; }, 1000);',
+    '        }',
+    '      } catch (err) {',
+    '        // ignore',
+    '      }',
+    '    }',
+    '',
+    '    document.addEventListener("click", onClick, { capture: true });',
+    '  })();',
+    '</script>',
+    '<!-- ads-contact-conversion:end -->'
+  ].join('\r\n');
+
+  let out = html;
+  out = out.replace(/\s*<!-- ads-contact-conversion:start -->[\s\S]*?<!-- ads-contact-conversion:end -->\s*/g, '\r\n');
+
+  if (/<!-- gtag:end -->/i.test(out)) {
+    out = out.replace(/<!-- gtag:end -->/i, `<!-- gtag:end -->\r\n${headBlock}`);
+  } else if (/<!-- ga4:end -->/i.test(out)) {
+    // Backwards compatibility for older builds.
+    out = out.replace(/<!-- ga4:end -->/i, `<!-- ga4:end -->\r\n${headBlock}`);
+  } else {
+    out = out.replace(/<head(\b[^>]*)>/i, `<head$1>\r\n${headBlock}`);
+  }
+
+  return out;
+}
+
+// Google Ads tag is handled by injectGoogleTag().
 
 function injectGtm(html) {
   if (!GTM_ID || !/^GTM-[A-Z0-9]+$/i.test(GTM_ID)) return html;
@@ -322,6 +465,76 @@ function injectMetaKeywords(html, routePath) {
   return out;
 }
 
+function injectHeroImagesWithAlt(html, routePath) {
+  if (!routePath) return html;
+
+  function escapeAttr(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function textFromTag(source, tagName) {
+    const re = new RegExp(`<${tagName}\\b[^>]*>([\\s\\S]*?)<\\/${tagName}>`, 'i');
+    const m = source.match(re);
+    if (!m) return '';
+    return m[1]
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function normalizeImgSrc(raw) {
+    const s = String(raw || '').trim();
+    if (!s) return '';
+    if (/^https?:\/\//i.test(s)) return s;
+    if (s.startsWith('/')) return s;
+    // Handle img/..., ./img/..., .//img/... etc.
+    return `/${s.replace(/^\.+\/+/, '').replace(/^\/+/, '')}`;
+  }
+
+  const isEn = routePath === '/en/' || routePath.startsWith('/en/');
+  const h1Text = textFromTag(html, 'h1');
+  const titleText = textFromTag(html, 'title').replace(/\s*[—\-]\s*alpiK\s*$/i, '').trim();
+  const base = h1Text || titleText || (isEn ? 'Service' : 'Послуга');
+  const alt = isEn ? `Work photo: ${base}` : `Фото робіт: ${base}`;
+
+  let out = html;
+  out = out.replace(/<div\b([^>]*\bclass\s*=\s*["'][^"']*\bhero-bg\b[^"']*["'][^>]*)><\/div>/gi, (m, attrs) => {
+    const styleMatch = attrs.match(/\bstyle\s*=\s*(["'])([\s\S]*?)\1/i);
+    if (!styleMatch) return m;
+
+    const styleValue = styleMatch[2] || '';
+    if (!/\burl\s*\(/i.test(styleValue)) return m;
+
+    const urlMatch = styleValue.match(/url\(\s*['\"]?([^'\"\)]+)['\"]?\s*\)/i);
+    if (!urlMatch) return m;
+
+    const rawSrc = urlMatch[1];
+    const src = normalizeImgSrc(rawSrc);
+    if (!src) return m;
+
+    // Remove inline style from this block (gradient/filter handled in CSS for .hero-bg--img)
+    const attrsWithoutStyle = attrs.replace(/\s*\bstyle\s*=\s*(["'])[\s\S]*?\1/i, '');
+
+    // Ensure the helper class exists.
+    let finalAttrs = attrsWithoutStyle;
+    finalAttrs = finalAttrs.replace(/\bclass\s*=\s*(["'])([\s\S]*?)\1/i, (mm, q, cls) => {
+      const classes = cls.split(/\s+/).filter(Boolean);
+      if (!classes.includes('hero-bg--img')) classes.push('hero-bg--img');
+      return `class=${q}${classes.join(' ')}${q}`;
+    });
+
+    return `<div${finalAttrs} aria-hidden="true"><img class="hero-bg-img" src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" fetchpriority="high"></div>`;
+  });
+
+  return out;
+}
+
 function optimizeImgTags(html) {
   let out = html;
 
@@ -389,10 +602,12 @@ function copyHtml(srcPath, destPath) {
   const routePath = routeFromDestPath(destPath);
   out = injectI18nSeo(out, routePath);
   out = injectMetaKeywords(out, routePath);
+  out = injectHeroImagesWithAlt(out, routePath);
   out = optimizeImgTags(out);
   out = injectFavicon(out);
   out = injectGtm(out);
-  out = injectGoogleAdsTag(out);
+  out = injectGoogleTag(out);
+  out = injectAdsContactConversion(out);
   fs.writeFileSync(destPath, out, 'utf8');
 }
 
@@ -411,6 +626,33 @@ function copyDir(srcDir, destDir) {
         copyFile(src, dst);
       }
     }
+  }
+}
+
+function listDistHtmlFiles(dirPath) {
+  const out = [];
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  for (const e of entries) {
+    const p = path.join(dirPath, e.name);
+    if (e.isDirectory()) {
+      out.push(...listDistHtmlFiles(p));
+    } else if (e.isFile() && e.name.toLowerCase().endsWith('.html')) {
+      out.push(p);
+    }
+  }
+  return out;
+}
+
+function ensureGoogleTagEverywhere() {
+  const files = listDistHtmlFiles(dist);
+  for (const filePath of files) {
+    const html = fs.readFileSync(filePath, 'utf8');
+    const hasGtag = /<!--\s*gtag:start\s*-->/i.test(html);
+    if (hasGtag) continue;
+
+    let out = html;
+    if (!hasGtag) out = injectGoogleTag(out);
+    fs.writeFileSync(filePath, out, 'utf8');
   }
 }
 
@@ -473,3 +715,4 @@ for (const dir of ['img', 'en']) {
 }
 
 console.log(`Built static site into: ${dist}`);
+ensureGoogleTagEverywhere();
