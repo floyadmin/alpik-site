@@ -10,8 +10,10 @@
    - **Build command**: `npm run build`
    - **Build output directory**: `dist`
 3. В **Settings → Environment variables** (если нужно) добавьте:
+   - `SITE_GA4_ID` (пример: `G-ABC123DEF4`)
    - `SITE_GTM_ID` (пример: `GTM-XXXXXXX`)
    - `SITE_GADS_ID` (пример: `AW-123456789`)
+   - `SITE_ADS_CONVERSION_CONTACT_SEND_TO` (пример: `AW-123456789/AbCdEfGhIjK`)
 4. Закоммитьте и отправьте изменения в ветку, к которой привязан Pages — деплой выполнится автоматически.
 
 ### Вариант B — вручную из консоли (быстро “прямо сейчас”)

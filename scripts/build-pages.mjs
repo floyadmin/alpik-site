@@ -2,12 +2,45 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import crypto from 'node:crypto';
+
+import { minify as minifyHtml } from 'html-minifier-terser';
+import CleanCSS from 'clean-css';
+import { minify as minifyJs } from 'terser';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
 const enDir = path.join(root, 'en');
+
+function shortHash(text) {
+  return crypto.createHash('sha1').update(String(text || ''), 'utf8').digest('hex').slice(0, 10);
+}
+
+const STYLE_VERSION = fs.existsSync(path.join(root, 'style.css'))
+  ? shortHash(fs.readFileSync(path.join(root, 'style.css'), 'utf8'))
+  : '';
+const LANG_SWITCHER_VERSION = fs.existsSync(path.join(root, 'lang-switcher.js'))
+  ? shortHash(fs.readFileSync(path.join(root, 'lang-switcher.js'), 'utf8'))
+  : '';
+
+function injectAssetVersions(html) {
+  let out = html;
+  if (STYLE_VERSION) {
+    out = out.replace(/(href\s*=\s*)(["'])\/(style\.css)(\?[^"']*)?\2/gi, (m, p1, q, file) => {
+      if (/\?v=/.test(m)) return m;
+      return `${p1}${q}/${file}?v=${STYLE_VERSION}${q}`;
+    });
+  }
+  if (LANG_SWITCHER_VERSION) {
+    out = out.replace(/(src\s*=\s*)(["'])\/(lang-switcher\.js)(\?[^"']*)?\2/gi, (m, p1, q, file) => {
+      if (/\?v=/.test(m)) return m;
+      return `${p1}${q}/${file}?v=${LANG_SWITCHER_VERSION}${q}`;
+    });
+  }
+  return out;
+}
 
 const SITE_BASE_URL = (process.env.SITE_BASE_URL || 'https://alpik-kyiv.com').trim().replace(/\/+$/g, '');
 
@@ -65,6 +98,8 @@ function injectGoogleTag(html) {
   const headBlock = [
     '<!-- gtag:start -->',
     '<!-- Google tag (gtag.js) -->',
+    '<link rel="preconnect" href="https://www.googletagmanager.com">',
+    '<link rel="dns-prefetch" href="//www.googletagmanager.com">',
     `<script async src="https://www.googletagmanager.com/gtag/js?id=${loaderId}"></script>`,
     '<script>',
     '  window.dataLayer = window.dataLayer || [];',
@@ -608,6 +643,7 @@ function copyHtml(srcPath, destPath) {
   out = injectGtm(out);
   out = injectGoogleTag(out);
   out = injectAdsContactConversion(out);
+  out = injectAssetVersions(out);
   fs.writeFileSync(destPath, out, 'utf8');
 }
 
@@ -653,6 +689,58 @@ function ensureGoogleTagEverywhere() {
     let out = html;
     if (!hasGtag) out = injectGoogleTag(out);
     fs.writeFileSync(filePath, out, 'utf8');
+  }
+}
+
+async function minifyDistAssets() {
+  // Minify HTML/CSS/JS in dist/ only (source files remain readable).
+  const cleanCss = new CleanCSS({ level: 2 });
+
+  // CSS
+  {
+    const cssPath = path.join(dist, 'style.css');
+    if (fs.existsSync(cssPath)) {
+      const css = fs.readFileSync(cssPath, 'utf8');
+      const res = cleanCss.minify(css);
+      if (!res.errors || res.errors.length === 0) {
+        fs.writeFileSync(cssPath, res.styles, 'utf8');
+      } else {
+        console.warn('CSS minify skipped due to errors:', res.errors);
+      }
+    }
+  }
+
+  // JS
+  for (const file of ['lang-switcher.js', 'tracking.js']) {
+    const jsPath = path.join(dist, file);
+    if (!fs.existsSync(jsPath)) continue;
+    const js = fs.readFileSync(jsPath, 'utf8');
+    const res = await minifyJs(js, {
+      compress: true,
+      mangle: true,
+      ecma: 2017,
+      safari10: true
+    });
+    if (res && res.code) fs.writeFileSync(jsPath, res.code, 'utf8');
+  }
+
+  // HTML
+  const htmlFiles = listDistHtmlFiles(dist);
+  for (const filePath of htmlFiles) {
+    const html = fs.readFileSync(filePath, 'utf8');
+    const min = await minifyHtml(html, {
+      removeComments: true,
+      collapseWhitespace: true,
+      conservativeCollapse: true,
+      keepClosingSlash: true,
+      removeRedundantAttributes: true,
+      removeScriptTypeAttributes: true,
+      removeStyleLinkTypeAttributes: true,
+      useShortDoctype: true,
+      minifyCSS: false,
+      minifyJS: false
+    });
+    fs.writeFileSync(filePath, min, 'utf8');
   }
 }
 
@@ -716,3 +804,4 @@ for (const dir of ['img', 'en']) {
 
 console.log(`Built static site into: ${dist}`);
 ensureGoogleTagEverywhere();
+await minifyDistAssets();

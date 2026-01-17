@@ -10,7 +10,10 @@
   Cache-Control: public, max-age=31536000, immutable
 
 /style.css
-  Cache-Control: public, max-age=300
+  Cache-Control: public, max-age=31536000, immutable
+
+/lang-switcher.js
+  Cache-Control: public, max-age=31536000, immutable
 
 /tracking.js
   Cache-Control: public, max-age=0, must-revalidate
