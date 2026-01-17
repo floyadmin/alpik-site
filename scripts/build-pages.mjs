@@ -637,7 +637,6 @@ function copyHtml(srcPath, destPath) {
   const routePath = routeFromDestPath(destPath);
   out = injectI18nSeo(out, routePath);
   out = injectMetaKeywords(out, routePath);
-  out = injectHeroImagesWithAlt(out, routePath);
   out = optimizeImgTags(out);
   out = injectFavicon(out);
   out = injectGtm(out);
