@@ -18,6 +18,60 @@ function shortHash(text) {
   return crypto.createHash('sha1').update(String(text || ''), 'utf8').digest('hex').slice(0, 10);
 }
 
+function shortHashBuffer(buf) {
+  return crypto.createHash('sha1').update(buf).digest('hex').slice(0, 10);
+}
+
+const IMAGE_VERSION_CACHE = new Map();
+
+function getVersionForRelPath(relPath) {
+  const key = String(relPath || '');
+  if (!key) return '';
+  if (IMAGE_VERSION_CACHE.has(key)) return IMAGE_VERSION_CACHE.get(key);
+  const abs = path.join(root, key);
+  if (!fs.existsSync(abs)) {
+    IMAGE_VERSION_CACHE.set(key, '');
+    return '';
+  }
+  const stat = fs.statSync(abs);
+  if (!stat.isFile()) {
+    IMAGE_VERSION_CACHE.set(key, '');
+    return '';
+  }
+  const v = shortHashBuffer(fs.readFileSync(abs));
+  IMAGE_VERSION_CACHE.set(key, v);
+  return v;
+}
+
+function normalizeRelativeImgPaths(html) {
+  let out = html;
+  // Make relative img paths root-relative so pretty URLs like /service-xx/ don't break.
+  out = out.replace(
+    /(\b(?:src|href|poster|data-src|data-href)\s*=\s*)(["'])(?:\.\/|\.\/\/)?img\//gi,
+    '$1$2/img/'
+  );
+  out = out.replace(/url\(\s*(["']?)(?:\.\/|\.\/\/)?img\//gi, 'url($1/img/');
+  return out;
+}
+
+function injectImageVersions(html) {
+  let out = html;
+
+  // Add/replace ?v= for local /img/* assets to play nicely with immutable caching.
+  // We only touch strings that clearly look like quoted attributes or url(...) usages.
+  out = out.replace(
+    /([("'=])\/img\/([A-Za-z0-9][A-Za-z0-9._-]*\.(?:png|jpe?g|webp|svg|gif))(?:\?[^"')\s>]*)?/gi,
+    (m, prefix, file) => {
+      const cleanPath = `/img/${file}`;
+      const v = getVersionForRelPath(`img/${file}`);
+      if (!v) return `${prefix}${cleanPath}`;
+      return `${prefix}${cleanPath}?v=${v}`;
+    }
+  );
+
+  return out;
+}
+
 const STYLE_VERSION = fs.existsSync(path.join(root, 'style.css'))
   ? shortHash(fs.readFileSync(path.join(root, 'style.css'), 'utf8'))
   : '';
@@ -638,11 +692,13 @@ function copyHtml(srcPath, destPath) {
   out = injectI18nSeo(out, routePath);
   out = injectMetaKeywords(out, routePath);
   out = optimizeImgTags(out);
+  out = normalizeRelativeImgPaths(out);
   out = injectFavicon(out);
   out = injectGtm(out);
   out = injectGoogleTag(out);
   out = injectAdsContactConversion(out);
   out = injectAssetVersions(out);
+  out = injectImageVersions(out);
   fs.writeFileSync(destPath, out, 'utf8');
 }
 

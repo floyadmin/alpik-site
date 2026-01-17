@@ -73,10 +73,123 @@ async function buildHeroBackgroundWebps() {
   }
 }
 
+function listHtmlFiles(dirPath) {
+  const out = [];
+  if (!exists(dirPath)) return out;
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  for (const e of entries) {
+    const p = path.join(dirPath, e.name);
+    if (e.isDirectory()) {
+      out.push(...listHtmlFiles(p));
+    } else if (e.isFile() && e.name.toLowerCase().endsWith('.html')) {
+      out.push(p);
+    }
+  }
+  return out;
+}
+
+function extractHeroImagePathsFromHtml(html) {
+  const out = [];
+  const s = String(html || '');
+
+  // Match inline hero backgrounds like:
+  // <div class="hero-bg" style="... url('/img/1.jpg?v=20260115') ..."></div>
+  const re = /class\s*=\s*(["'])[^"']*\bhero-bg\b[^"']*\1[\s\S]*?style\s*=\s*(["'])([\s\S]*?)\2/gi;
+  let m;
+  while ((m = re.exec(s))) {
+    const styleValue = m[3] || '';
+    const urlRe = /url\(\s*(["']?)([^"')]+)\1\s*\)/gi;
+    let u;
+    while ((u = urlRe.exec(styleValue))) {
+      const raw = (u[2] || '').trim();
+      if (!raw) continue;
+
+      // Strip query/hash.
+      const cleaned = raw.split('#')[0].split('?')[0];
+      out.push(cleaned);
+    }
+  }
+
+  return out;
+}
+
+function normalizeImgRelPath(p) {
+  const s = String(p || '').trim();
+  if (!s) return '';
+  if (/^https?:\/\//i.test(s)) return '';
+  if (s.startsWith('/img/')) return s.slice(1); // -> img/...
+  if (s.startsWith('img/')) return s;
+  if (s.startsWith('./img/')) return s.slice(2);
+  if (s.startsWith('.//img/')) return s.replace(/^\.\/+/, '');
+  return '';
+}
+
+async function optimizeHeroImagesFromHtml() {
+  const rootDir = root;
+  const enDir = path.join(root, 'en');
+  const htmlFiles = [...listHtmlFiles(rootDir), ...listHtmlFiles(enDir)];
+
+  const relPaths = new Set();
+  for (const filePath of htmlFiles) {
+    let html = '';
+    try {
+      html = fs.readFileSync(filePath, 'utf8');
+    } catch {
+      continue;
+    }
+    const urls = extractHeroImagePathsFromHtml(html);
+    for (const u of urls) {
+      const rel = normalizeImgRelPath(u);
+      if (rel) relPaths.add(rel);
+    }
+  }
+
+  const maxWidth = 1600;
+
+  for (const rel of relPaths) {
+    const abs = path.join(root, rel);
+    if (!exists(abs)) continue;
+
+    const ext = path.extname(abs).toLowerCase();
+    if (!['.jpg', '.jpeg', '.png'].includes(ext)) continue;
+
+    const tmp = abs + '.tmp';
+    try {
+      const img = sharp(abs);
+      const meta = await img.metadata();
+      const width = meta && meta.width ? meta.width : null;
+      const shouldResize = !!(width && width > maxWidth);
+
+      let pipeline = sharp(abs);
+      if (shouldResize) {
+        pipeline = pipeline.resize({ width: maxWidth, withoutEnlargement: true });
+      }
+
+      if (ext === '.png') {
+        await pipeline.png({ compressionLevel: 9, adaptiveFiltering: true }).toFile(tmp);
+      } else {
+        await pipeline
+          .jpeg({ quality: 78, progressive: true, mozjpeg: true })
+          .toFile(tmp);
+      }
+
+      fs.renameSync(tmp, abs);
+    } catch (err) {
+      try {
+        if (exists(tmp)) fs.rmSync(tmp, { force: true });
+      } catch {
+        // ignore
+      }
+      console.warn('Hero image optimize skipped for', rel, String(err && err.message ? err.message : err));
+    }
+  }
+}
+
 async function main() {
   ensureDir(imgDir);
   await buildLogoAssets();
   await buildHeroBackgroundWebps();
+  await optimizeHeroImagesFromHtml();
 }
 
 main().catch((err) => {
