@@ -107,7 +107,10 @@ function injectAssetVersions(html) {
 
 const SITE_BASE_URL = (process.env.SITE_BASE_URL || 'https://alpik-kyiv.com').trim().replace(/\/+$/g, '');
 
-const GTM_ID = (process.env.SITE_GTM_ID || '').trim();
+// Google Tag Manager container ID.
+// If not provided via env, fall back to the container from the project setup.
+const DEFAULT_GTM_ID = 'GTM-M7QW4QDS';
+const GTM_ID = (process.env.SITE_GTM_ID || DEFAULT_GTM_ID).trim();
 
 // Legacy single-ID env var (kept for backwards compatibility)
 const GADS_ID = (process.env.SITE_GADS_ID || '').trim();
